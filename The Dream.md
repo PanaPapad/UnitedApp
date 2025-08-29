@@ -137,6 +137,3 @@ Create an LLM RAG system with a knowledge base containing match information. Ide
 - AI Agents (RAG?): Python or JavaScript (pure or with agent libraries like LangGraph)
 - Front End: JavaScript framework (e.g., React)
 - Database: PostgreSQL
-
-
-
