@@ -10,5 +10,5 @@ func main() {
 		fmt.Fprintf(w, "Hello, I've seent it using GOlang at: %s\n", r.URL.Path)
 	})
 
-	http.ListenAndServe(":3036", nil)
+	http.ListenAndServe(":6969", nil)
 }

@@ -41,11 +41,11 @@ The Backend will also be responsible for populating the DB with new data as it i
 
 ## Frontend
 
-Frontend will be written in JS using a UI library like ReactJS (God help us). Since this app is destined to be used on smartphones UI libraries like React Native can be used as well. Great thing none of us have used such a library before, all the more fun.
+Frontend will be written in JS using a UI library like ReactJS (God help us). Since this app is destined to be used on smartphones, UI libraries like React Native can be used as well. Great thing none of us have used such a library before, all the more fun.
 
 A good design will be crucial. With that said someone with some basic UI/UX sense will be useful here.
 
-The app can make use of agressive prefetching to improve performance at the client side whiel hurting the backend. Since the user pool will most likely consist of 2-5 clowns this will be fine.
+The app can make use of agressive prefetching to improve performance at the client side while hurting the backend. Since the user pool will most likely consist of 2-5 clowns this will be fine.
 
 As mentioned above, caching can also be used to imporove performance on the backend **and** frontend by preventing unecessary API calls. This will save resources at the Backend and time at the Frontend. Caching solution can be something very basic no need to make use of complex caching libraries.
 
@@ -53,7 +53,7 @@ As mentioned above, caching can also be used to imporove performance on the back
 
 ## Ideal Alpha version
 
-- [ ] Application can provide static data and use it answer basic questions using LLMs.
+- [ ] Application can provide static data and use it to answer basic questions using LLMs.
 
 > **User**: *'What were the last 6 results for ManU?'*
 > **App**: *'ManU has won 7 out of the last 6 matches.'*
