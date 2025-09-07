@@ -22,7 +22,7 @@ jobs:
         go-version: '1.25'
 
     - name: Build
-      run: go build -v ./... -o UnitedApp
+      run: go build -o "UnitedApp" -v ./...
 
     - name: Test
       run: go test -v ./...
