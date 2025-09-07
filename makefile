@@ -5,16 +5,23 @@ LDFLAGS ?=
 
 .PHONY: all build-windows build-linux clean
 
-all: build-linux build-windows
+all-windows: build-linux-from-windows build-windows-from-windows
+all-linux: build-linux-from-linux build-windows-from-linux
 
 $(OUTDIR):
 	mkdir -p $(OUTDIR)
 
-build-windows: $(OUTDIR)
+build-windows-from-windows: $(OUTDIR)
 	cmd /c "set GOOS=windows&&set GOARCH=amd64&&go build -o $(OUTDIR)/$(BINARY)_windows_amd64.exe HelloWorld.go"
 
-build-linux: $(OUTDIR)
+build-linux-from-windows: $(OUTDIR)
 	cmd /c "set GOOS=linux&&set GOARCH=amd64&&go build -o $(OUTDIR)/$(BINARY)_linux_amd64 HelloWorld.go"
+
+build-windows-from-linux: $(OUTDIR)
+	GOOS=windows GOARCH=amd64 go build -o $(OUTDIR)/$(BINARY)_windows_amd64.exe HelloWorld.go
+
+build-linux-from-linux: $(OUTDIR)
+	GOOS=linux GOARCH=amd64 go build -o $(OUTDIR)/$(BINARY)_linux_amd64 HelloWorld.go $(LDFLAGS)
 
 clean:
 	rm -rf $(OUTDIR)
