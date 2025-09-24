@@ -1,0 +1,131 @@
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.hero-section {
+  text-align: center;
+  margin: 2rem 0 4rem 0;
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.typewriter-text {
+  font-size: 4rem;
+  font-weight: 900;
+  font-family: 'Courier New', monospace;
+  color: #DA020E; /* Man United Red */
+  margin: 0 auto 1rem auto;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+  transition: all 1.5s ease-in-out;
+  text-align: center;
+  display: block;
+  width: 100%;
+}
+
+.typewriter-text.glow-effect {
+  text-shadow: 
+    0 0 10px rgba(218, 2, 14, 0.8),
+    0 0 20px rgba(218, 2, 14, 0.6),
+    0 0 30px rgba(218, 2, 14, 0.4),
+    2px 2px 4px rgba(0,0,0,0.3);
+  transform: scale(1.05);
+  color: #FFD700; /* Gold accent when glowing */
+}
+
+.cursor {
+  animation: blink 1s infinite;
+  color: #DA020E; /* Man United Red */
+  font-weight: 100;
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+.subtitle.subtitle-fade-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.card {
+  padding: 2rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  max-width: 400px;
+  margin: 0 auto;
+  opacity: 0;
+  transform: translateY(30px) scale(0.95);
+  transition: all 2.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.card.card-fade-in {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.loading-spinner {
+  text-align: center;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(218, 2, 14, 0.2);
+  border-left: 4px solid #DA020E; /* Man United Red */
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem auto;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.api-status {
+  text-align: center;
+}
+
+.api-status.success {
+  color: #FFD700; /* Man United Gold */
+}
+
+.api-status.error {
+  color: #f87171;
+}
+
+.status-details {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  color: #888;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 1rem;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .typewriter-text {
+    font-size: 2.5rem;
+  }
+  
+  .hero-section {
+    margin: 1rem 0 2rem 0;
+  }
+  
+  .card {
+    margin: 0 1rem;
+    padding: 1.5rem;
+  }
+}
