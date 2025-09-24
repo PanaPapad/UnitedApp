@@ -48,7 +48,7 @@ function App() {
   }, [text.length]);
 
   return (
-    <>      
+    <>
       <div className="hero-section">
         <h1 className={`typewriter-text ${animationComplete ? 'glow-effect' : ''}`}>
           {text.slice(0, visibleChars)}
