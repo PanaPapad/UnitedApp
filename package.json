@@ -1,0 +1,29 @@
+{
+  "name": "unitedapp",
+  "version": "1.0.0",
+  "description": "The app that unites us",
+  "main": "index.js",
+  "scripts": {
+    "test": "go test ./...",
+    "prepare": "husky",
+    "build": "npm run build:frontend && go build -v ./...",
+    "build:frontend": "cd frontend && npm run build",
+    "lint": "cd frontend && npm run lint",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:backend": "go run HelloWorld.go"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PanaPapad/UnitedApp.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/PanaPapad/UnitedApp/issues"
+  },
+  "homepage": "https://github.com/PanaPapad/UnitedApp#readme",
+  "devDependencies": {
+    "husky": "^9.1.7"
+  }
+}

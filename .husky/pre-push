@@ -1,0 +1,66 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "Running quality checks before push..."
+
+# Frontend checks
+echo "Checking frontend..."
+cd frontend || exit 1
+
+# Use fnm if available
+if command -v fnm >/dev/null 2>&1; then
+    fnm use 22 || echo "Warning: fnm not available, using system Node"
+fi
+
+# Run ESLint
+echo "Running ESLint..."
+npm run lint || {
+    echo "ESLint failed! Fix linting errors before pushing."
+    exit 1
+}
+
+# Build frontend
+echo "Building frontend..."
+npm run build || {
+    echo "Frontend build failed! Fix build errors before pushing."
+    exit 1
+}
+
+# Go back to root
+cd ..
+
+# Backend checks
+echo "Checking Go backend..."
+
+# Check Go formatting
+echo "Checking Go formatting..."
+unformatted=$(gofmt -l .)
+if [ -n "$unformatted" ]; then
+    echo "Go code is not properly formatted! Run 'go fmt ./...' before pushing."
+    echo "Files that need formatting:"
+    echo "$unformatted"
+    exit 1
+fi
+
+# Run go vet
+echo "Running go vet..."
+go vet ./... || {
+    echo "go vet failed! Fix issues before pushing."
+    exit 1
+}
+
+# Build Go app
+echo "Building Go backend..."
+go build -o /tmp/united-app-test ./... || {
+    echo "Go build failed! Fix build errors before pushing."
+    exit 1
+}
+
+# Run Go tests
+echo "Running Go tests..."
+go test ./... || {
+    echo "Go tests failed! Fix failing tests before pushing."
+    exit 1
+}
+
+echo "All checks passed! Pushing to remote..."
