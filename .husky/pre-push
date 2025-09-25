@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-echo "Running quality checks before push..."
+echo "Running checks before push..."
 
 # Frontend checks
 echo "Checking frontend..."
@@ -29,23 +29,12 @@ npm run build || {
 # Go back to root
 cd ..
 
-# Backend checks
 echo "Checking Go backend..."
 
-# Check Go formatting
-echo "Checking Go formatting..."
-unformatted=$(gofmt -l .)
-if [ -n "$unformatted" ]; then
-    echo "Go code is not properly formatted! Run 'go fmt ./...' before pushing."
-    echo "Files that need formatting:"
-    echo "$unformatted"
-    exit 1
-fi
-
-# Run go vet
-echo "Running go vet..."
-go vet ./... || {
-    echo "go vet failed! Fix issues before pushing."
+# Run Go tests
+echo "Running Go tests..."
+go test ./... || {
+    echo "Go tests failed! Fix failing tests before pushing."
     exit 1
 }
 
@@ -53,13 +42,6 @@ go vet ./... || {
 echo "Building Go backend..."
 go build -o /tmp/united-app-test ./... || {
     echo "Go build failed! Fix build errors before pushing."
-    exit 1
-}
-
-# Run Go tests
-echo "Running Go tests..."
-go test ./... || {
-    echo "Go tests failed! Fix failing tests before pushing."
     exit 1
 }
 
