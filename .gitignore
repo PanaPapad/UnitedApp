@@ -1,4 +1,5 @@
 bin/*
 .vscode/*
 venv.*
-node_modules/*
+
+node_modules
