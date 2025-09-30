@@ -144,6 +144,16 @@ with onto:
         inverse_property = homeStadium
         pass
 
+    class hasCapacity(Stadium >> int, FunctionalProperty):
+        label = "hasCapacity"
+        comment = "The capacity of a stadium"
+        pass
+
+    class teamHasCode(Team >> str, FunctionalProperty):
+        label = "teamHasCode"
+        comment = "The code of the team, e.g MUN for Manchester United"
+        pass
+
     # Human Data Properties
     class hasBirthDate(Human >> str, FunctionalProperty):
         label = "hasBirthDate"
@@ -324,11 +334,13 @@ with onto:
     RWB = Position("RWB")
     
     # Midfielders
+    DM = Position("DM")
     CDM = Position("CDM")
     CM = Position("CM")
     CAM = Position("CAM")
     LM = Position("LM")
     RM = Position("RM")
+    AM = Position("AM")
     
     # Forwards
     LW = Position("LW")
@@ -708,5 +720,5 @@ with onto:
 
 
 # Save the ontology to a file
-onto.save(file = "Ontology/unitedOntology.owl", format = "rdfxml")
+onto.save(file = "unitedOntology.owl", format = "rdfxml")
 
