@@ -72,6 +72,7 @@ function App() {
             <div className="status-details">
               <span>Status: {health.status}</span>
               <span>Port: {health.port}</span>
+              <span>DB Status: {health.db_status}</span>
             </div>
           </div>
         ) : (

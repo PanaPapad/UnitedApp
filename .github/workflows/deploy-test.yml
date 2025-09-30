@@ -20,6 +20,10 @@ jobs:
       uses: actions/setup-go@v4
       with:
         go-version: '1.25'
+    
+    - name: Install dependencies
+      run: |
+        go get -v ./...
 
     - name: Set up Node.js
       uses: actions/setup-node@v4
@@ -37,7 +41,7 @@ jobs:
         npm run build
 
     - name: Build Go backend
-      run: go build -o "UnitedApp" -ldflags "-X main.Port=6868" -v ./...
+      run: go build -o "UnitedApp" -ldflags "-X main.Port=6868" -v ./server/main.go
 
     - name: Test
       run: go test -v ./...

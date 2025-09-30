@@ -40,7 +40,7 @@ go test ./... || {
 
 # Build Go app
 echo "Building Go backend..."
-go build -o /tmp/united-app-test ./... || {
+go build -o /tmp/united-app-test ./server/main.go || {
     echo "Go build failed! Fix build errors before pushing."
     exit 1
 }
