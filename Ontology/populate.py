@@ -6,6 +6,9 @@ import pandas as pd
 
 
 def post_toGraphDB(data):
+    """
+    Function that posts a ttl file to GraphDB
+    """
     url = "http://localhost:7200/repositories/UnitedApp/statements"
 
     headers = {'Content-Type': 'text/turtle',}
@@ -19,6 +22,9 @@ def post_toGraphDB(data):
 
 
 def add_players(team_name):
+    """
+    Function that reads from a csv data about players and creates a graph
+    """
     g = Graph()
     #g.parse("unitedOntology.owl", format="xml")
     UO = Namespace("http://semanticweb.org/unitedOntology#")
@@ -51,7 +57,10 @@ def add_players(team_name):
     for s,p,o in g.triples((None, None, None)):
         print(s,p,o)
 
-def main():
+def add_team_data():
+    """
+    Function that reads data from a csv file about teams and creates a graph
+    """
     # Load ontology
     g = Graph()
     g.parse("unitedOntology.owl", format="xml")
@@ -95,6 +104,5 @@ def main():
 
     post_toGraphDB(rdf_data)
 
-#main()
-add_players("Brighton_&_Hove_Albion")
-
+#add_team_data()
+add_players("Wolverhampton_Wanderers")

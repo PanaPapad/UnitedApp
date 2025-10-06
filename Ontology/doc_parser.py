@@ -39,7 +39,8 @@ def md_to_csv(md_table, out_file):
     df.to_csv(out_file, index=False)
     return df
 
-url = "https://www.fotmob.com/teams/10204/squad/brighton-hove-albion"
+url = "https://www.fotmob.com/teams/8602/squad/wolverhampton-wanderers"
 team_name = url.rstrip("/").split("/")[-1]
 md_table = covert_to_md(url)
-md_to_csv(md_table, f"Data/{team_name}.csv")
+team_name_corrected = team_name[0].upper() + team_name[1:]
+md_to_csv(md_table, f"Data/{team_name_corrected}.csv")
