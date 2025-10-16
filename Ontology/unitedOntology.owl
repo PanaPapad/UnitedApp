@@ -126,6 +126,77 @@
   <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">A stadium is the home of a team</rdfs:comment>
 </owl:ObjectProperty>
 
+<owl:ObjectProperty rdf:about="#goalScoredBy">
+  <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+  <rdfs:domain rdf:resource="#Goal"/>
+  <rdfs:range rdf:resource="#Player"/>
+  <owl:inverseOf rdf:resource="#scorerOfGoal"/>
+  <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">goalScoredBy</rdfs:label>
+  <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The player who scored the goal</rdfs:comment>
+</owl:ObjectProperty>
+
+<owl:ObjectProperty rdf:about="#scorerOfGoal">
+  <rdfs:domain rdf:resource="#Player"/>
+  <rdfs:range rdf:resource="#Goal"/>
+  <owl:inverseOf rdf:resource="#goalScoredBy"/>
+  <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">scorerOfGoal</rdfs:label>
+  <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The goal scored by the player</rdfs:comment>
+</owl:ObjectProperty>
+
+<owl:ObjectProperty rdf:about="#goalInMatch">
+  <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+  <rdfs:domain rdf:resource="#Goal"/>
+  <rdfs:range rdf:resource="#Match"/>
+  <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">goalInMatch</rdfs:label>
+  <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The match the goal was scored in</rdfs:comment>
+</owl:ObjectProperty>
+
+<owl:ObjectProperty rdf:about="#goalForTeam">
+  <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+  <rdfs:domain rdf:resource="#Goal"/>
+  <rdfs:range rdf:resource="#Team"/>
+  <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">goalForTeam</rdfs:label>
+  <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The team the goal was scored for</rdfs:comment>
+</owl:ObjectProperty>
+
+<owl:ObjectProperty rdf:about="#assistedBy">
+  <rdfs:domain rdf:resource="#Goal"/>
+  <rdfs:range rdf:resource="#Player"/>
+  <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">assistedBy</rdfs:label>
+  <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The player who assisted the goal</rdfs:comment>
+</owl:ObjectProperty>
+
+<owl:ObjectProperty rdf:about="#assistInMatch">
+  <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+  <rdfs:domain rdf:resource="#Assist"/>
+  <rdfs:range rdf:resource="#Match"/>
+  <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">assistInMatch</rdfs:label>
+  <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The match the assist was made in</rdfs:comment>
+</owl:ObjectProperty>
+
+<owl:ObjectProperty rdf:about="#assistForGoal">
+  <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+  <rdfs:domain rdf:resource="#Assist"/>
+  <rdfs:range rdf:resource="#Goal"/>
+  <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">assistForGoal</rdfs:label>
+  <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The goal the assist was made for</rdfs:comment>
+</owl:ObjectProperty>
+
+<owl:ObjectProperty rdf:about="#hasPictureURL">
+  <rdfs:domain>
+    <owl:Class>
+      <owl:unionOf rdf:parseType="Collection">
+        <rdf:Description rdf:about="#Human"/>
+        <rdf:Description rdf:about="#Team"/>
+        <rdf:Description rdf:about="#Stadium"/>
+      </owl:unionOf>
+    </owl:Class>
+  </rdfs:domain>
+  <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">hasPictureURL</rdfs:label>
+  <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The URL of the picture</rdfs:comment>
+</owl:ObjectProperty>
+
 <owl:ObjectProperty rdf:about="#hasPreviousTeam">
   <rdfs:domain rdf:resource="#Player"/>
   <rdfs:range rdf:resource="#PreviousTeamEntry"/>
@@ -360,6 +431,34 @@
   <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">A player has match statistics</rdfs:comment>
 </owl:ObjectProperty>
 
+<owl:ObjectProperty rdf:about="#playerScored">
+  <rdfs:domain rdf:resource="#PlayerMatchStats"/>
+  <rdfs:range rdf:resource="#Goal"/>
+  <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">playerScored</rdfs:label>
+  <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">A goal scored by a player in a match</rdfs:comment>
+</owl:ObjectProperty>
+
+<owl:ObjectProperty rdf:about="#playerAssisted">
+  <rdfs:domain rdf:resource="#PlayerMatchStats"/>
+  <rdfs:range rdf:resource="#Assist"/>
+  <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">playerAssisted</rdfs:label>
+  <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">An assist made by a player in a match</rdfs:comment>
+</owl:ObjectProperty>
+
+<owl:ObjectProperty rdf:about="#playerReceivedYellowCard">
+  <rdfs:domain rdf:resource="#PlayerMatchStats"/>
+  <rdfs:range rdf:resource="#YellowCard"/>
+  <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">playerReceivedYellowCard</rdfs:label>
+  <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">A yellow card received by a player in a match</rdfs:comment>
+</owl:ObjectProperty>
+
+<owl:ObjectProperty rdf:about="#playerReceivedRedCard">
+  <rdfs:domain rdf:resource="#PlayerMatchStats"/>
+  <rdfs:range rdf:resource="#RedCard"/>
+  <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">playerReceivedRedCard</rdfs:label>
+  <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">A red card received by a player in a match</rdfs:comment>
+</owl:ObjectProperty>
+
 <owl:ObjectProperty rdf:about="#seasonStatsOfTeam">
   <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
   <rdfs:domain rdf:resource="#TeamSeasonStats"/>
@@ -418,12 +517,84 @@
   <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The capacity of a stadium</rdfs:comment>
 </owl:DatatypeProperty>
 
+<owl:DatatypeProperty rdf:about="#creationDate">
+  <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+  <rdfs:domain rdf:resource="#Stadium"/>
+  <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">creationData</rdfs:label>
+  <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The date the stadium was created</rdfs:comment>
+</owl:DatatypeProperty>
+
 <owl:DatatypeProperty rdf:about="#teamHasCode">
   <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
   <rdfs:domain rdf:resource="#Team"/>
   <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
   <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">teamHasCode</rdfs:label>
   <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The code of the team, e.g MUN for Manchester United</rdfs:comment>
+</owl:DatatypeProperty>
+
+<owl:DatatypeProperty rdf:about="#goalTime">
+  <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+  <rdfs:domain rdf:resource="#Goal"/>
+  <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">goalTime</rdfs:label>
+  <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The time the goal was scored in the match, e.g., 45+2'</rdfs:comment>
+</owl:DatatypeProperty>
+
+<owl:DatatypeProperty rdf:about="#isOwnGoal">
+  <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+  <rdfs:domain rdf:resource="#Goal"/>
+  <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+  <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">isOwnGoal</rdfs:label>
+  <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">If the goal was an own goal</rdfs:comment>
+</owl:DatatypeProperty>
+
+<owl:DatatypeProperty rdf:about="#isPenaltyGoal">
+  <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+  <rdfs:domain rdf:resource="#Goal"/>
+  <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+  <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">isPenaltyGoal</rdfs:label>
+  <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">If the goal was scored from a penalty</rdfs:comment>
+</owl:DatatypeProperty>
+
+<owl:DatatypeProperty rdf:about="#isFreeKickGoal">
+  <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+  <rdfs:domain rdf:resource="#Goal"/>
+  <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+  <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">isFreeKickGoal</rdfs:label>
+  <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">If the goal was scored from a free kick</rdfs:comment>
+</owl:DatatypeProperty>
+
+<owl:DatatypeProperty rdf:about="#goalOrderInMatch">
+  <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+  <rdfs:domain rdf:resource="#Goal"/>
+  <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+  <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">goalOrderInMatch</rdfs:label>
+  <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The order of the goal in the match, e.g., 1 for the first goal, 2 for the second goal, etc.</rdfs:comment>
+</owl:DatatypeProperty>
+
+<owl:DatatypeProperty rdf:about="#assistTime">
+  <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+  <rdfs:domain rdf:resource="#Assist"/>
+  <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">assistTime</rdfs:label>
+  <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The time the assist was made in the match, e.g., 45+2'</rdfs:comment>
+</owl:DatatypeProperty>
+
+<owl:DatatypeProperty rdf:about="#yellowCardTime">
+  <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+  <rdfs:domain rdf:resource="#YellowCard"/>
+  <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">YellowCardTime</rdfs:label>
+  <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The time the yellow card was given in the match, e.g., 45+2'</rdfs:comment>
+</owl:DatatypeProperty>
+
+<owl:DatatypeProperty rdf:about="#redCardTime">
+  <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+  <rdfs:domain rdf:resource="#RedCard"/>
+  <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">RedCardTime</rdfs:label>
+  <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The time the red card was given in the match, e.g., 45+2'</rdfs:comment>
 </owl:DatatypeProperty>
 
 <owl:DatatypeProperty rdf:about="#hasBirthDate">
@@ -448,6 +619,14 @@
   <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
   <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">hasHeight</rdfs:label>
   <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The height of a human in cm</rdfs:comment>
+</owl:DatatypeProperty>
+
+<owl:DatatypeProperty rdf:about="#hasWeight">
+  <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+  <rdfs:domain rdf:resource="#Human"/>
+  <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+  <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">hasWeight</rdfs:label>
+  <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The weight of the human in kg</rdfs:comment>
 </owl:DatatypeProperty>
 
 <owl:DatatypeProperty rdf:about="#previousTeamStartDate">
@@ -569,6 +748,30 @@
   <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The number of fouls committed by a team in a match</rdfs:comment>
 </owl:DatatypeProperty>
 
+<owl:DatatypeProperty rdf:about="#totalFoulsWon">
+  <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+  <rdfs:domain rdf:resource="#TeamMatchStats"/>
+  <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+  <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">totalFoulsWon</rdfs:label>
+  <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The number of fouls won by a team</rdfs:comment>
+</owl:DatatypeProperty>
+
+<owl:DatatypeProperty rdf:about="#totalSaves">
+  <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+  <rdfs:domain rdf:resource="#TeamMatchStats"/>
+  <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+  <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">totalSaves</rdfs:label>
+  <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The number of saves made by a team</rdfs:comment>
+</owl:DatatypeProperty>
+
+<owl:DatatypeProperty rdf:about="#aerialDuelsWon">
+  <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+  <rdfs:domain rdf:resource="#TeamMatchStats"/>
+  <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+  <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">aerialDuelsWon</rdfs:label>
+  <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The percentage of aerial duels won by a team</rdfs:comment>
+</owl:DatatypeProperty>
+
 <owl:DatatypeProperty rdf:about="#teamYellowCards">
   <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
   <rdfs:domain rdf:resource="#TeamMatchStats"/>
@@ -593,28 +796,20 @@
   <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The number of offsides by a team in a match</rdfs:comment>
 </owl:DatatypeProperty>
 
+<owl:DatatypeProperty rdf:about="#teamOwnGoals">
+  <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+  <rdfs:domain rdf:resource="#TeamMatchStats"/>
+  <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+  <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">teamOwnGoals</rdfs:label>
+  <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The number of own goals by a team in a match</rdfs:comment>
+</owl:DatatypeProperty>
+
 <owl:DatatypeProperty rdf:about="#minutesPlayed">
   <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
   <rdfs:domain rdf:resource="#PlayerMatchStats"/>
   <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
   <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">minutesPlayed</rdfs:label>
   <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The number of minutes played by a player in a match</rdfs:comment>
-</owl:DatatypeProperty>
-
-<owl:DatatypeProperty rdf:about="#playerGoalsScored">
-  <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
-  <rdfs:domain rdf:resource="#PlayerMatchStats"/>
-  <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
-  <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">playerGoalsScored</rdfs:label>
-  <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The number of goals scored by a player in a match</rdfs:comment>
-</owl:DatatypeProperty>
-
-<owl:DatatypeProperty rdf:about="#assists">
-  <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
-  <rdfs:domain rdf:resource="#PlayerMatchStats"/>
-  <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
-  <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">assists</rdfs:label>
-  <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The number of assists by a player in a match</rdfs:comment>
 </owl:DatatypeProperty>
 
 <owl:DatatypeProperty rdf:about="#playerShotsOnTarget">
@@ -647,22 +842,6 @@
   <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
   <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">playerFoulsCommitted</rdfs:label>
   <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The number of fouls committed by a player in a match</rdfs:comment>
-</owl:DatatypeProperty>
-
-<owl:DatatypeProperty rdf:about="#playerYellowCards">
-  <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
-  <rdfs:domain rdf:resource="#PlayerMatchStats"/>
-  <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
-  <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">playerYellowCards</rdfs:label>
-  <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The number of yellow cards received by a player in a match</rdfs:comment>
-</owl:DatatypeProperty>
-
-<owl:DatatypeProperty rdf:about="#playerRedCard">
-  <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
-  <rdfs:domain rdf:resource="#PlayerMatchStats"/>
-  <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
-  <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">playerRedCards</rdfs:label>
-  <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">If a player received a red card in a match</rdfs:comment>
 </owl:DatatypeProperty>
 
 <owl:DatatypeProperty rdf:about="#playerOffsides">
@@ -927,6 +1106,30 @@
   <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
   <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Lineup</rdfs:label>
   <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">A team lineup in a specific match</rdfs:comment>
+</owl:Class>
+
+<owl:Class rdf:about="#Goal">
+  <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+  <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Goal</rdfs:label>
+  <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">A goal scored in a match</rdfs:comment>
+</owl:Class>
+
+<owl:Class rdf:about="#Assist">
+  <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+  <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Assist</rdfs:label>
+  <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">An assist in a match</rdfs:comment>
+</owl:Class>
+
+<owl:Class rdf:about="#YellowCard">
+  <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+  <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">YellowCard</rdfs:label>
+  <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">A yellow card given to a player in a match</rdfs:comment>
+</owl:Class>
+
+<owl:Class rdf:about="#RedCard">
+  <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+  <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">RedCard</rdfs:label>
+  <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">A red card given to a player in a match</rdfs:comment>
 </owl:Class>
 
 <owl:Class rdf:about="#PreviousTeamEntry">

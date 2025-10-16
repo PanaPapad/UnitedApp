@@ -39,4 +39,6 @@ def get_team_data():
     print(stadiums_table)
     # manually added the code column
 
+    
+
 get_team_data()

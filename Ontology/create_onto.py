@@ -149,9 +149,112 @@ with onto:
         comment = "The capacity of a stadium"
         pass
 
+    class creationDate(Stadium >> str, FunctionalProperty):
+        label = "creationData"
+        comment = "The date the stadium was created"
+
     class teamHasCode(Team >> str, FunctionalProperty):
         label = "teamHasCode"
         comment = "The code of the team, e.g MUN for Manchester United"
+        pass
+
+    # Goal
+    class Goal(Thing):
+        label = "Goal"
+        comment = "A goal scored in a match"
+        pass
+
+    class goalScoredBy(Goal >> Player, FunctionalProperty):
+        label = "goalScoredBy"
+        comment = "The player who scored the goal"
+        pass
+
+    class scorerOfGoal(Player >> Goal):
+        label = "scorerOfGoal"
+        comment = "The goal scored by the player"
+        inverse_property = goalScoredBy
+        pass
+
+    class goalInMatch(Goal >> Match, FunctionalProperty):
+        label = "goalInMatch"
+        comment = "The match the goal was scored in"
+        pass
+
+    class goalForTeam(Goal >> Team, FunctionalProperty):
+        label = "goalForTeam"
+        comment = "The team the goal was scored for"
+        pass
+    
+    class goalTime(Goal >> str, FunctionalProperty):
+        label = "goalTime"
+        comment = "The time the goal was scored in the match, e.g., 45+2'"
+        pass
+
+    class isOwnGoal(Goal >> bool, FunctionalProperty):
+        label = "isOwnGoal"
+        comment = "If the goal was an own goal"
+        pass
+
+    class isPenaltyGoal(Goal >> bool, FunctionalProperty):
+        label = "isPenaltyGoal"
+        comment = "If the goal was scored from a penalty"
+        pass
+
+    class isFreeKickGoal(Goal >> bool, FunctionalProperty):
+        label = "isFreeKickGoal"
+        comment = "If the goal was scored from a free kick"
+        pass
+
+    class goalOrderInMatch(Goal >> int, FunctionalProperty):
+        label = "goalOrderInMatch"
+        comment = "The order of the goal in the match, e.g., 1 for the first goal, 2 for the second goal, etc."
+        pass
+
+    class assistedBy(Goal >> Player):
+        label = "assistedBy"
+        comment = "The player who assisted the goal"
+        pass
+
+    
+    # Assist
+    class Assist(Thing):
+        label = "Assist"
+        comment = "An assist in a match"
+        pass
+
+    class assistTime(Assist >> str, FunctionalProperty):
+        label = "assistTime"
+        comment = "The time the assist was made in the match, e.g., 45+2'"
+        pass
+
+    class assistInMatch(Assist >> Match, FunctionalProperty):
+        label = "assistInMatch"
+        comment = "The match the assist was made in"
+        pass
+
+    class assistForGoal(Assist >> Goal, FunctionalProperty):
+        label = "assistForGoal"
+        comment = "The goal the assist was made for"
+        pass
+    
+    class YellowCard(Thing):
+        label = "YellowCard"
+        comment = "A yellow card given to a player in a match"
+        pass
+
+    class yellowCardTime(YellowCard >> str, FunctionalProperty):
+        label = "YellowCardTime"
+        comment = "The time the yellow card was given in the match, e.g., 45+2'"
+        pass
+
+    class RedCard(Thing):
+        label = "RedCard"
+        comment = "A red card given to a player in a match"
+        pass
+
+    class redCardTime(RedCard >> str, FunctionalProperty):
+        label = "RedCardTime"
+        comment = "The time the red card was given in the match, e.g., 45+2'"
         pass
 
     # Human Data Properties
@@ -168,6 +271,18 @@ with onto:
     class hasHeight(Human >> float, FunctionalProperty):
         label = "hasHeight"
         comment = "The height of a human in cm"
+        pass
+
+    class hasWeight(Human >> float, FunctionalProperty):
+        label = "hasWeight"
+        comment = "The weight of the human in kg"
+        pass
+
+    class hasPictureURL(ObjectProperty):
+        domain=[Or([Human,Team,Stadium])]
+        range=[str]
+        label = "hasPictureURL"
+        comment = "The URL of the picture"
         pass
 
     # Previous Teams of a Player
@@ -466,6 +581,18 @@ with onto:
         comment = "The number of fouls committed by a team in a match"
         pass
 
+    class totalFoulsWon(TeamMatchStats >> int, FunctionalProperty):
+        label = "totalFoulsWon"
+        comment = "The number of fouls won by a team"
+    
+    class totalSaves(TeamMatchStats >> int, FunctionalProperty):
+        label = "totalSaves"
+        comment = "The number of saves made by a team"
+    
+    class aerialDuelsWon(TeamMatchStats >> float, FunctionalProperty):
+        label = "aerialDuelsWon"
+        comment = "The percentage of aerial duels won by a team"
+
     class teamYellowCards(TeamMatchStats >> int, FunctionalProperty):
         label = "teamYellowCards"
         comment = "The number of yellow cards received by a team in a match"
@@ -479,6 +606,11 @@ with onto:
     class teamOffsides(TeamMatchStats >> int, FunctionalProperty):
         label = "teamOffsides"
         comment = "The number of offsides by a team in a match"
+        pass
+    
+    class teamOwnGoals(TeamMatchStats >> int, FunctionalProperty):
+        label = "teamOwnGoals"
+        comment = "The number of own goals by a team in a match"
         pass
 
     # Player Stats in a Match
@@ -514,14 +646,14 @@ with onto:
         comment = "The number of minutes played by a player in a match"
         pass
 
-    class playerGoalsScored(PlayerMatchStats >> int, FunctionalProperty):
-        label = "playerGoalsScored"
-        comment = "The number of goals scored by a player in a match"
+    class playerScored(PlayerMatchStats >> Goal):
+        label = "playerScored"
+        comment = "A goal scored by a player in a match"
         pass
 
-    class assists(PlayerMatchStats >> int, FunctionalProperty):
-        label = "assists"
-        comment = "The number of assists by a player in a match"
+    class playerAssisted(PlayerMatchStats >> Assist):
+        label = "playerAssisted"
+        comment = "An assist made by a player in a match"
         pass
 
     class playerShotsOnTarget(PlayerMatchStats >> int, FunctionalProperty):
@@ -544,20 +676,21 @@ with onto:
         comment = "The number of fouls committed by a player in a match"
         pass
 
-    class playerYellowCards(PlayerMatchStats >> int, FunctionalProperty):
-        label = "playerYellowCards"
-        comment = "The number of yellow cards received by a player in a match"
+    class playerReceivedYellowCard(PlayerMatchStats >> YellowCard):
+        label = "playerReceivedYellowCard"
+        comment = "A yellow card received by a player in a match"
         pass
 
-    class playerRedCard(PlayerMatchStats >> bool, FunctionalProperty):
-        label = "playerRedCards"
-        comment = "If a player received a red card in a match"
+    class playerReceivedRedCard(PlayerMatchStats >> RedCard):
+        label = "playerReceivedRedCard"
+        comment = "A red card received by a player in a match"
         pass
 
     class playerOffsides(PlayerMatchStats >> int, FunctionalProperty):
         label = "playerOffsides"
         comment = "The number of offsides by a player in a match"
         pass
+
 
     # Season Stats
     class TeamSeasonStats(Thing):
