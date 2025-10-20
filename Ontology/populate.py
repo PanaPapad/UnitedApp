@@ -19,6 +19,40 @@ def post_toGraphDB(data):
         print(f'Error adding data to GraphDB: {response.status_code}')
         print(response.text)
 
+
+import os
+import requests
+
+def upload_ttl_folder_to_graphdb(folder_path):
+    """
+    Uploads all .ttl files from a folder into a specified GraphDB repository.
+
+    Args:
+        folder_path (str): Path to the folder containing TTL files.
+       
+    """
+    endpoint = "http://localhost:7200/repositories/UnitedApp/statements"
+    headers = {
+        "Content-Type": "text/turtle"
+    }
+
+    for filename in os.listdir(folder_path):
+        if filename.endswith(".ttl"):
+            file_path = os.path.join(folder_path, filename)
+            print(f"📤 Uploading {filename} ...")
+
+            with open(file_path, "rb") as f:
+                response = requests.post(endpoint, headers=headers, data=f)
+
+            if response.status_code in (200, 204):
+                print(f"✅ Uploaded {filename}")
+            else:
+                print(f"❌ Failed to upload {filename}: {response.status_code}")
+                print(response.text)
+
+    print("🎯 All TTL files processed.")
+
+
 def add_players(team_name):
     """
     Function that reads from a csv data about players and creates a graph
@@ -72,11 +106,13 @@ def find_player(player_name, team_name=None):
     query = f"""
     PREFIX : <http://semanticweb.org/unitedOntology#>
     PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+    PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
 
     SELECT ?player WHERE {{
     ?player a :Player ;
             :playsFor :{team_name} ;
-            rdfs:label ?label .
+            (rdfs:label | skos:altLabel) ?label .
     FILTER({regex_filters})
     }}
     """
@@ -222,6 +258,8 @@ def add_match_data(match_file):
     match_name = match_data["match"].replace(" ", "_")
     home_team = match_data["home_team"].replace(" ","_")
     away_team = match_data["away_team"].replace(" ", "_")
+    tournament = match_data["tournament"]
+    gameweek = match_data["gameweek"]
     score = match_data["score"]
     home_goals, away_goals = map(int, score.split("-"))
     home_scorers = match_data["home_scorers"]
@@ -262,6 +300,10 @@ def add_match_data(match_file):
     g.add((matchURI, UO.hasHomeTeam, home_teamURI))
     g.add((matchURI, UO.hasAwayTeam, away_teamURI))
 
+    # link match to tournament and gameweek
+    tournamentURI = URIRef(UO + tournament)
+    g.add((matchURI, UO.matchPartOfTournament, tournamentURI))
+    g.add((matchURI, UO.matchGameweek, Literal(gameweek, datatype=XSD.integer)))
     # create TeamMatchStats instances
     home_team_statsURI = URIRef(UO+f"{home_team_code}TeamStats_{match_name}")
     away_team_statsURI = URIRef(UO+f"{away_team_code}TeamStats_{match_name}")
@@ -269,7 +311,8 @@ def add_match_data(match_file):
     g.add((away_team_statsURI, RDF.type, UO.TeamMatchStats))
     g.add((home_team_statsURI, UO.statsOfTeam, home_teamURI))
     g.add((away_team_statsURI, UO.statsOfTeam, away_teamURI))
-    
+    g.add((matchURI, UO.matchHasTeamStats, home_team_statsURI))
+    g.add((matchURI, UO.matchHasTeamStats, away_team_statsURI))
     # add stats to TeamMathStats for both and away teams
     # goals scored
     g.add((home_team_statsURI, UO.teamGoalsScored, Literal(home_goals, datatype=XSD.integer)))
@@ -323,8 +366,8 @@ def add_match_data(match_file):
         player_subbed_off = pdata["subbed_off"]
         # minutes played
         minuted_played = calculate_minutes_played(player_started, player_subbed_on, player_subbed_off)
-        #if minuted_played == 0:
-        #    continue
+        if minuted_played == 0:
+            continue
         playerURI = find_player(player_name, home_team)
         if playerURI is None:
             unfound_players.append(player_name)
@@ -342,8 +385,8 @@ def add_match_data(match_file):
         player_subbed_off = pdata["subbed_off"]
         # minutes played
         minuted_played = calculate_minutes_played(player_started, player_subbed_on, player_subbed_off)
-        #if minuted_played == 0:
-        #    continue
+        if minuted_played == 0:
+            continue
 
         playerURI = find_player(player_name, away_team)
         if playerURI is None:
@@ -422,17 +465,18 @@ def add_match_data(match_file):
         # read cards
         red_card = pdata["red_cards"]
         if red_card:
+            red_card = red_card[0]
             red_card_URI = URIRef(UO + f"RedCard_{match_name}_{player_name}")
             g.add((red_card_URI, RDF.type, UO.RedCard))
             g.add((red_card_URI, UO.redCardTime, Literal(red_card, datatype=XSD.string)))
             g.add((playerStatsURI, UO.playerReceivedRedCard, red_card_URI))
   
     print("Unfound players:", unfound_players)
-    with open("Data/unfound_players2.txt", "a") as fp:
+    with open("Data/hidden/unfound_players2.txt", "a") as fp:
         for p in unfound_players:
             fp.write(p + "\n")
         fp.close()
-    g.serialize(destination=f"Data/Matches/{match_name}.ttl", format='turtle')
+    g.serialize(destination=f"Data/Matches/1st/{match_name}.ttl", format='turtle')
     
     return
 
@@ -440,6 +484,7 @@ if __name__ == "__main__":
     #add_team_data()
     #add_players("Wolverhampton_Wanderers")\
     #add_match_data("Data/Matches/MCI_vs_BUR_PL25.json")
-    add_match_data("Data/Matches/BHA_vs_FUL_PL25.json")
+    #add_match_data("Data/Matches/BHA_vs_FUL_PL25.json")
     
+    upload_ttl_folder_to_graphdb("Data/Matches/1st/ttls")
     pass

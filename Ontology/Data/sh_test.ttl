@@ -1,0 +1,17 @@
+@prefix uo: <http://semanticweb.org/unitedOntology#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+
+uo:AVL_vs_NEW_PL25 a uo:Match ;
+    uo:hasAwayTeam uo:Newcastle_United ;
+    uo:hasHomeTeam uo:AVl ;
+
+    uo:matchGameweek 1 ;
+    uo:matchHasTeamStats uo:AVLTeamStats_AVL_vs_NEW_PL25,
+        uo:NEWTeamStats_AVL_vs_NEW_PL25 ;
+    uo:matchPartOfTournament uo:PL_25 .
+
+
+uo:Nick_Pope a uo:Player, uo:Human, owl:Thing .
+uo:Nick_Pope uo:playsFor uo:Arsenal .

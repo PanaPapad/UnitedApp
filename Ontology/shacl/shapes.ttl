@@ -1,0 +1,72 @@
+@prefix uo: <http://semanticweb.org/unitedOntology#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+
+uo:MatchShape
+    a sh:NodeShape ;
+    sh:targetClass uo:Match ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "homeTeam and awayTeam must be different." ;
+        sh:select """
+            SELECT $this ?team
+            WHERE {
+                $this uo:hasHomeTeam ?team ;
+                      uo:hasAwayTeam ?team .
+            }
+        """ ;
+    ] ;
+    
+    sh:property [
+        sh:path uo:hasHomeTeam ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:message "Each match can have only one home team" ;
+    ] ;
+    sh:property [
+        sh:path uo:hasAwayTeam ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:message "Each match can have only one away team" ;
+    ] ;
+    sh:property [
+        sh:path uo:matchPartOfTournament ;
+        sh:maxCount 1 ;
+        sh:message "Each match can only be part of one tournament" ;
+    ] ;
+    sh:property [
+        sh:path uo:matchGameweek ;
+        sh:maxCount 1 ;
+        sh:minInclusive 1 ;
+        sh:message "Each match can have only one gameweek, which needs to be an integer larger or equal to 1" ;
+    ] .
+
+uo:PlayerShape
+    a sh:NodeShape ;
+    sh:targetClass uo:Player ;
+
+    sh:property [
+        sh:path uo:playsFor ;
+        sh:maxCount 1 ;
+        sh:message "Each player can only play for one team" ;
+    ] .
+
+uo:TeamShape
+    a sh:NodeShape ;
+    sh:targetClass uo:Team ;
+
+    sh:property [
+        sh:path uo:hasCoach ;
+        sh:maxCount 1;
+        sh:message "Each team can only have one coach" ;
+    ] ;
+    sh:property [
+        sh:path uo:hasTeamCode ;
+        sh:maxCount 1;
+        sh:message "Each team can only have only one team code" ;
+    ] ;
+    sh:property [
+        sh:path uo:homeStadium ;
+        sh:maxCount 1;
+        sh:message "Each team can only have only one home stadium" ;
+    ] .

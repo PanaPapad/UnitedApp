@@ -523,6 +523,10 @@ with onto:
         inverse_property = matchHasStadium
         pass
 
+    class matchGameweek(Match >> int, FunctionalProperty):
+        label = "matchGameweek"
+        comment = "The gameweek of the match in a league tournament"
+        pass
 
     # Team Match Stats Properties
     class TeamMatchStats(Thing):

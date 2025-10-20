@@ -5,6 +5,7 @@ from io import StringIO
 import json
 import re
 from typing import Dict, Any, List, Tuple
+from unidecode import unidecode
 from populate import add_match_data
 
 
@@ -51,7 +52,7 @@ TimeEntry = Tuple[str, str]                 # (time_str, is_own_goal)
 with open('Data/teamCodes.json', 'r') as fp:
     team_codes = json.load(fp)
     
-def extract_match_stats(md_text: str) -> Dict[str, Any]:
+def extract_match_stats(md_text: str, gameweek) -> Dict[str, Any]:
     """
     Returns a dict with:
       - score: "H-A"
@@ -164,6 +165,8 @@ def extract_match_stats(md_text: str) -> Dict[str, Any]:
 
     return {
         "match": f"{home_team_code}_vs_{away_team_code}_PL25",
+        "tournament": "PL_25",
+        "gameweek": gameweek,
         "score": f"{home_score}-{away_score}",
         "home_team": home_team,
         "away_team": away_team,
@@ -232,6 +235,7 @@ def parse_match_file(md_text: str):
             for i, m in enumerate(matches):
                 number = int(m.group(1))
                 name = m.group(2).strip()
+                name = unidecode(name)
                 is_captain = "(c)" in m.group(0)
 
                 # Extract everything belonging to this player until the next one
@@ -312,20 +316,37 @@ if __name__ == "__main__":
     md_to_csv(md_table, f"Data/{team_name_corrected}.csv")
     """
 
-    match_stats_url = "https://www.skysports.com/football/chelsea-vs-liverpool/stats/531193"
-    stats_md = convert_to_md(match_stats_url)
-    stats = extract_match_stats(stats_md)
-    #print(stats)
-    match_name = stats["match"]
-    player_stats_url = match_stats_url.replace("/stats/", "/teams/")
-    player_stats_md = convert_to_md(player_stats_url)
-    player_stats = parse_match_file(player_stats_md)
-   
-    stats.update(player_stats)
+    Pl_1_URLS = [
+        "https://www.skysports.com/football/liverpool-vs-bournemouth/stats/531129",
+        "https://www.skysports.com/football/aston-villa-vs-newcastle-united/stats/531130",
+        "https://www.skysports.com/football/brighton-and-hove-albion-vs-fulham/stats/531131",
+        "https://www.skysports.com/football/sunderland-vs-west-ham-united/stats/531133",
+        "https://www.skysports.com/football/tottenham-hotspur-vs-burnley/stats/531134",
+        "https://www.skysports.com/football/wolverhampton-wanderers-vs-manchester-city/stats/531135",
+        "https://www.skysports.com/football/chelsea-vs-crystal-palace/stats/531136",
+        "https://www.skysports.com/football/nottingham-forest-vs-brentford/stats/531132",
+        "https://www.skysports.com/football/manchester-united-vs-arsenal/stats/531137",
+        "https://www.skysports.com/football/leeds-united-vs-everton/stats/531138"
+
+    ]
 
 
-    file = f"Data/Matches/{match_name}.json"
-    with open(file, 'x') as fp:
-        json.dump(stats, fp)
+    gameweek = 1
+    for match_stats_url in Pl_1_URLS:
 
-    add_match_data(file)
+        stats_md = convert_to_md(match_stats_url)
+        stats = extract_match_stats(stats_md, gameweek)
+        #print(stats)
+        match_name = stats["match"]
+        player_stats_url = match_stats_url.replace("/stats/", "/teams/")
+        player_stats_md = convert_to_md(player_stats_url)
+        player_stats = parse_match_file(player_stats_md)
+    
+        stats.update(player_stats)
+
+
+        file = f"Data/Matches/1st/Jsons/{match_name}.json"
+        with open(file, 'x') as fp:
+            json.dump(stats, fp)
+
+        add_match_data(file)

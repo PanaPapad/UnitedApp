@@ -692,6 +692,14 @@
   <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The date of the match</rdfs:comment>
 </owl:DatatypeProperty>
 
+<owl:DatatypeProperty rdf:about="#matchGameweek">
+  <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+  <rdfs:domain rdf:resource="#Match"/>
+  <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+  <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">matchGameweek</rdfs:label>
+  <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The gameweek of the match in a league tournament</rdfs:comment>
+</owl:DatatypeProperty>
+
 <owl:DatatypeProperty rdf:about="#teamGoalsScored">
   <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
   <rdfs:domain rdf:resource="#TeamMatchStats"/>
