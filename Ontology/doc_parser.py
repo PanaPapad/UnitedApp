@@ -3,14 +3,46 @@ import re
 import pandas as pd
 from io import StringIO
 import json
-import re
-from typing import Dict, Any, List, Tuple
+import requests
+from typing import Dict, Any, List, Tuple, Optional
 from unidecode import unidecode
 from populate import add_match_data
 
+def get_team_data():
+    """
+    Function to get a table with team information from wikipedia
+    """
+    url = "https://en.wikipedia.org/wiki/2025%E2%80%9326_Premier_League"
+
+    # Add browser-like headers
+    headers = {
+        "User-Agent": (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/123.0.0.0 Safari/537.36"
+        )
+    }
+
+    # Get HTML content with requests
+    response = requests.get(url, headers=headers)
+    response.raise_for_status()
+    
+    # Now parse HTML with pandas
+    tables = pd.read_html(StringIO(response.text))
+
+    # Print all tables and their columns
+    for i, table in enumerate(tables):
+        print(f"Table {i}: {table.columns.tolist()}")
+
+    # The stadiums/teams table is usually in index 1, but check the printout
+    stadiums_table = tables[1]
+    # Save to CSV
+    stadiums_table.to_csv("data/premier_league_teams.csv", index=False, encoding="utf-8")
+    print(stadiums_table)
+    # manually added the code column
 
 def convert_to_md(url):
-    "Converts a url to an md table"
+    "Converts a url to an md table, by using DocumentConverter from docling"
     converter = DocumentConverter()
     result = converter.convert(url)
     mark = result.document.export_to_markdown()
@@ -24,34 +56,11 @@ def convert_to_md(url):
     #print(filtered)
     return mark
 
-
-def md_to_csv(md_table, out_file):
-    rows = []
-    for line in md_table.splitlines():
-        line = line.strip()
-        # skip separator lines (like ----)
-        if set(line) <= {"|", "-", " "}:
-            continue
-        # remove leading/trailing | and collapse multiple spaces
-        line = line.strip("|")
-        line = re.sub(r"\s+", " ", line)
-        rows.append(line)
-
-    cleaned = "\n".join(rows)
-
-    # Now parse into DataFrame
-    df = pd.read_csv(StringIO(cleaned), sep="|")
-    df = df.applymap(lambda x: x.strip() if isinstance(x, str) else x)
-
-    df.to_csv(out_file, index=False)
-    return df
-
-TimeEntry = Tuple[str, str]                 # (time_str, is_own_goal)
-
 # find team codes to make names smaller
 with open('Data/teamCodes.json', 'r') as fp:
     team_codes = json.load(fp)
     
+TimeEntry = Tuple[str, str]     # (time_str, is_own_goal)
 def extract_match_stats(md_text: str, gameweek) -> Dict[str, Any]:
     """
     Returns a dict with:
@@ -175,11 +184,11 @@ def extract_match_stats(md_text: str, gameweek) -> Dict[str, Any]:
         "stats": stats,
     }
 
-import re
-import json
-from typing import Dict, Any, List, Tuple, Optional
-
 def parse_match_file(md_text: str):
+    """
+    Function that parses the markdown text of a match teams page
+    and returns a dictionary with home and away team players and their events.
+    """
     def extract_teams_section(md_text):
         """Get everything under ## Teams until #### Key."""
         pattern = r"## Teams(.*?)#### Key"
@@ -229,9 +238,6 @@ def parse_match_file(md_text: str):
         def extract_players(section, is_starter=True):
             pattern = r"(\d+)\s*\n+(?:[A-Z]\s*\n+)?([A-Za-zÀ-ÿ'’\-]+(?: [A-Za-zÀ-ÿ'’\-]+)*)\s*(?:\(c\))?"
             matches = list(re.finditer(pattern, section))
-            #print(section)
-            print("Extracting players:")
-            #print(matches)
             for i, m in enumerate(matches):
                 number = int(m.group(1))
                 name = m.group(2).strip()
@@ -304,49 +310,159 @@ def parse_match_file(md_text: str):
         "away_team_players": away_players
     }
 
-
-
 if __name__ == "__main__":
 
-    """
-    url = "https://www.fotmob.com/teams/8602/squad/wolverhampton-wanderers"
-    team_name = url.rstrip("/").split("/")[-1]
-    md_table = convert_to_md(url)
-    team_name_corrected = team_name[0].upper() + team_name[1:]
-    md_to_csv(md_table, f"Data/{team_name_corrected}.csv")
-    """
+    PL_URLS ={ 
+        1: [
+            "https://www.skysports.com/football/liverpool-vs-bournemouth/stats/531129",
+            "https://www.skysports.com/football/aston-villa-vs-newcastle-united/stats/531130",
+            "https://www.skysports.com/football/brighton-and-hove-albion-vs-fulham/stats/531131",
+            "https://www.skysports.com/football/sunderland-vs-west-ham-united/stats/531133",
+            "https://www.skysports.com/football/tottenham-hotspur-vs-burnley/stats/531134",
+            "https://www.skysports.com/football/wolverhampton-wanderers-vs-manchester-city/stats/531135",
+            "https://www.skysports.com/football/chelsea-vs-crystal-palace/stats/531136",
+            "https://www.skysports.com/football/nottingham-forest-vs-brentford/stats/531132",
+            "https://www.skysports.com/football/manchester-united-vs-arsenal/stats/531137",
+            "https://www.skysports.com/football/leeds-united-vs-everton/stats/531138"
+        ],
+        2: [
+            "https://www.skysports.com/football/west-ham-united-vs-chelsea/stats/531148",
+            "https://www.skysports.com/football/manchester-city-vs-tottenham-hotspur/stats/531146",
+            "https://www.skysports.com/football/bournemouth-vs-wolverhampton-wanderers/stats/531140",
+            "https://www.skysports.com/football/brentford-vs-aston-villa/stats/531141",
+            "https://www.skysports.com/football/burnley-vs-sunderland/stats/531142",
+            "https://www.skysports.com/football/arsenal-vs-leeds-united/stats/531139",
+            "https://www.skysports.com/football/crystal-palace-vs-nottingham-forest/stats/531143",
+            "https://www.skysports.com/football/everton-vs-brighton-and-hove-albion/stats/531144",
+            "https://www.skysports.com/football/fulham-vs-manchester-united/stats/531145",
+            "https://www.skysports.com/football/newcastle-united-vs-liverpool/stats/531147"
 
-    Pl_1_URLS = [
-        "https://www.skysports.com/football/liverpool-vs-bournemouth/stats/531129",
-        "https://www.skysports.com/football/aston-villa-vs-newcastle-united/stats/531130",
-        "https://www.skysports.com/football/brighton-and-hove-albion-vs-fulham/stats/531131",
-        "https://www.skysports.com/football/sunderland-vs-west-ham-united/stats/531133",
-        "https://www.skysports.com/football/tottenham-hotspur-vs-burnley/stats/531134",
-        "https://www.skysports.com/football/wolverhampton-wanderers-vs-manchester-city/stats/531135",
-        "https://www.skysports.com/football/chelsea-vs-crystal-palace/stats/531136",
-        "https://www.skysports.com/football/nottingham-forest-vs-brentford/stats/531132",
-        "https://www.skysports.com/football/manchester-united-vs-arsenal/stats/531137",
-        "https://www.skysports.com/football/leeds-united-vs-everton/stats/531138"
+        ],
+        3: [
+            "https://www.skysports.com/football/sunderland-vs-brentford/stats/531156",
+            "https://www.skysports.com/football/tottenham-hotspur-vs-bournemouth/stats/531157",
+            "https://www.skysports.com/football/wolverhampton-wanderers-vs-everton/stats/531158",
+            "https://www.skysports.com/football/leeds-united-vs-newcastle-united/stats/531152",
+            "https://www.skysports.com/football/brighton-and-hove-albion-vs-manchester-city/stats/531150",
+            "https://www.skysports.com/football/nottingham-forest-vs-west-ham-united/stats/531155",
+            "https://www.skysports.com/football/liverpool-vs-arsenal/stats/531153",
+            "https://www.skysports.com/football/aston-villa-vs-crystal-palace/stats/531149",
+            "https://www.skysports.com/football/chelsea-vs-fulham/stats/531151",
+            "https://www.skysports.com/football/manchester-united-vs-burnley/stats/531154",
+        ],
+        4: [
+            "https://www.skysports.com/football/arsenal-vs-nottingham-forest/stats/531159",
+            "https://www.skysports.com/football/bournemouth-vs-brighton-and-hove-albion/stats/531160",
+            "https://www.skysports.com/football/crystal-palace-vs-sunderland/stats/531163",
+            "https://www.skysports.com/football/everton-vs-aston-villa/stats/531164",
+            "https://www.skysports.com/football/fulham-vs-leeds-united/stats/531165",
+            "https://www.skysports.com/football/newcastle-united-vs-wolverhampton-wanderers/stats/531167",
+            "https://www.skysports.com/football/west-ham-united-vs-tottenham-hotspur/stats/531168",
+            "https://www.skysports.com/football/brentford-vs-chelsea/stats/531161",
+            "https://www.skysports.com/football/burnley-vs-liverpool/stats/531162",
+            "https://www.skysports.com/football/manchester-city-vs-manchester-united/stats/531166"
 
-    ]
+        ],
+        5: [
+            "https://www.skysports.com/football/liverpool-vs-everton/stats/531174",
+            "https://www.skysports.com/football/brighton-and-hove-albion-vs-tottenham-hotspur/stats/531171",
+            "https://www.skysports.com/football/burnley-vs-nottingham-forest/stats/531172",
+            "https://www.skysports.com/football/west-ham-united-vs-crystal-palace/stats/531177",
+            "https://www.skysports.com/football/wolverhampton-wanderers-vs-leeds-united/stats/531178",
+            "https://www.skysports.com/football/manchester-united-vs-chelsea/stats/531175",
+            "https://www.skysports.com/football/fulham-vs-brentford/stats/531173",
+            "https://www.skysports.com/football/bournemouth-vs-newcastle-united/stats/531170",
+            "https://www.skysports.com/football/sunderland-vs-aston-villa/stats/531176",   
+            "https://www.skysports.com/football/arsenal-vs-manchester-city/stats/531169" 
+        ],
+        6: [
+            "https://www.skysports.com/football/brentford-vs-manchester-united/stats/531180",
+            "https://www.skysports.com/football/chelsea-vs-brighton-and-hove-albion/stats/531181",
+            "https://www.skysports.com/football/crystal-palace-vs-liverpool/stats/531182",
+            "https://www.skysports.com/football/leeds-united-vs-bournemouth/stats/531184",
+            "https://www.skysports.com/football/manchester-city-vs-burnley/stats/531185",
+            "https://www.skysports.com/football/nottingham-forest-vs-sunderland/stats/531187",
+            "https://www.skysports.com/football/tottenham-hotspur-vs-wolverhampton-wanderers/stats/531188",
+            "https://www.skysports.com/football/aston-villa-vs-fulham/stats/531179",
+            "https://www.skysports.com/football/newcastle-united-vs-arsenal/stats/531186",
+            "https://www.skysports.com/football/everton-vs-west-ham-united/stats/531183"
+        ],
+        7: [
+            "https://www.skysports.com/football/bournemouth-vs-fulham/stats/531191",
+            "https://www.skysports.com/football/leeds-united-vs-tottenham-hotspur/stats/531195",
+            "https://www.skysports.com/football/arsenal-vs-west-ham-united/stats/531189",
+            "https://www.skysports.com/football/manchester-united-vs-sunderland/stats/531196",
+            "https://www.skysports.com/football/chelsea-vs-liverpool/stats/531193",
+            "https://www.skysports.com/football/aston-villa-vs-burnley/stats/531190",
+            "https://www.skysports.com/football/everton-vs-crystal-palace/stats/531194",
+            "https://www.skysports.com/football/newcastle-united-vs-nottingham-forest/stats/531197",
+            "https://www.skysports.com/football/wolverhampton-wanderers-vs-brighton-and-hove-albion/stats/531198",
+            "https://www.skysports.com/football/brentford-vs-manchester-city/stats/531192"
+        ],
+        8: [
+            "https://www.skysports.com/football/nottingham-forest-vs-chelsea/stats/531205",
+            "https://www.skysports.com/football/brighton-and-hove-albion-vs-newcastle-united/stats/531199",
+            "https://www.skysports.com/football/burnley-vs-leeds-united/stats/531200",
+            "https://www.skysports.com/football/crystal-palace-vs-bournemouth/stats/531201",
+            "https://www.skysports.com/football/sunderland-vs-wolverhampton-wanderers/stats/531206",
+            "https://www.skysports.com/football/manchester-city-vs-everton/stats/531204",
+            "https://www.skysports.com/football/fulham-vs-arsenal/stats/531202",
+            "https://www.skysports.com/football/tottenham-hotspur-vs-aston-villa/stats/531207",
+            "https://www.skysports.com/football/liverpool-vs-manchester-united/stats/531203",
+            "https://www.skysports.com/football/west-ham-united-vs-brentford/stats/531208"
+        ],
+        9: [
+            "https://www.skysports.com/football/arsenal-vs-crystal-palace/stats/531209",
+            "https://www.skysports.com/football/aston-villa-vs-manchester-city/stats/531210",
+            "https://www.skysports.com/football/bournemouth-vs-nottingham-forest/stats/531211",
+            "https://www.skysports.com/football/brentford-vs-liverpool/stats/531212",
+            "https://www.skysports.com/football/chelsea-vs-sunderland/stats/531213",
+            "https://www.skysports.com/football/everton-vs-tottenham-hotspur/stats/531214",
+            "https://www.skysports.com/football/leeds-united-vs-west-ham-united/stats/531215",
+            "https://www.skysports.com/football/manchester-united-vs-brighton-and-hove-albion/stats/531216",
+            "https://www.skysports.com/football/newcastle-united-vs-fulham/stats/531217",
+            "https://www.skysports.com/football/wolverhampton-wanderers-vs-burnley/stats/531218"
 
+        ],
+        10: [
+            "https://www.skysports.com/football/brighton-and-hove-albion-vs-leeds-united/stats/531219",
+            "https://www.skysports.com/football/burnley-vs-arsenal/stats/531220",
+            "https://www.skysports.com/football/crystal-palace-vs-brentford/stats/531221",
+            "https://www.skysports.com/football/fulham-vs-wolverhampton-wanderers/stats/531222",
+            "https://www.skysports.com/football/nottingham-forest-vs-manchester-united/stats/531225",
+            "https://www.skysports.com/football/tottenham-hotspur-vs-chelsea/stats/531227",
+            "https://www.skysports.com/football/liverpool-vs-aston-villa/stats/531223",
+            "https://www.skysports.com/football/west-ham-united-vs-newcastle-united/stats/531228",
+            "https://www.skysports.com/football/manchester-city-vs-bournemouth/stats/531224",
+            "https://www.skysports.com/football/sunderland-vs-everton/stats/531226"
+        ],
+    }
 
-    gameweek = 1
-    for match_stats_url in Pl_1_URLS:
+    # for every gameweek and every match in that gameweek parse match stats and player stats and combine them
+    # then save them to a json file
+    for gameweek, urls in PL_URLS.items():
+        if gameweek !=10:
+            continue
 
-        stats_md = convert_to_md(match_stats_url)
-        stats = extract_match_stats(stats_md, gameweek)
-        #print(stats)
-        match_name = stats["match"]
-        player_stats_url = match_stats_url.replace("/stats/", "/teams/")
-        player_stats_md = convert_to_md(player_stats_url)
-        player_stats = parse_match_file(player_stats_md)
-    
-        stats.update(player_stats)
+        for match_stats_url in urls:
+            # convert match stats page to md
+            stats_md = convert_to_md(match_stats_url)
+            # extract match stats
+            stats = extract_match_stats(stats_md, gameweek)
+            match_name = stats["match"]
+            # get player stats url by replacing /stats/ with /teams/
+            player_stats_url = match_stats_url.replace("/stats/", "/teams/")
+            # convert player stats page to md
+            player_stats_md = convert_to_md(player_stats_url)
+            # extract player stats
+            player_stats = parse_match_file(player_stats_md)
+            # combine match stats and player stats (dictionaries)
+            stats.update(player_stats)
 
+            # save combined stats to json file
+            file = f"Data/Matches/{gameweek}/Jsons/{match_name}.json"
+            with open(file, 'x') as fp:
+                json.dump(stats, fp)
 
-        file = f"Data/Matches/1st/Jsons/{match_name}.json"
-        with open(file, 'x') as fp:
-            json.dump(stats, fp)
-
-        add_match_data(file)
+            # create RDF data from the json file 
+            add_match_data(file)

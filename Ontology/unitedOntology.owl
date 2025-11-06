@@ -162,8 +162,17 @@
 <owl:ObjectProperty rdf:about="#assistedBy">
   <rdfs:domain rdf:resource="#Goal"/>
   <rdfs:range rdf:resource="#Player"/>
+  <owl:inverseOf rdf:resource="#goalHasAssist"/>
   <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">assistedBy</rdfs:label>
   <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The player who assisted the goal</rdfs:comment>
+</owl:ObjectProperty>
+
+<owl:ObjectProperty rdf:about="#goalHasAssist">
+  <rdfs:domain rdf:resource="#Goal"/>
+  <rdfs:range rdf:resource="#Assist"/>
+  <owl:inverseOf rdf:resource="#assistedBy"/>
+  <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">goalHasAssist</rdfs:label>
+  <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The assist for the goal</rdfs:comment>
 </owl:ObjectProperty>
 
 <owl:ObjectProperty rdf:about="#assistInMatch">

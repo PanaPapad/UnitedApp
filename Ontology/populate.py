@@ -3,25 +3,24 @@ from rdflib.namespace import RDFS, DC, XSD
 import requests
 import pandas as pd
 import json
-
-def post_toGraphDB(data):
-    """
-    Function that posts a ttl file to GraphDB
-    """
-    url = "http://localhost:7200/repositories/UnitedApp/statements"
-
-    headers = {'Content-Type': 'text/turtle',}
-
-    response = requests.post(url, data=data.encode('utf=8'), headers=headers)
-    if response.status_code == 204:
-        print('Data successfully added to GraphDB.')
-    else:
-        print(f'Error adding data to GraphDB: {response.status_code}')
-        print(response.text)
-
-
 import os
-import requests
+from shacl.shacl_validate import shacl_validate
+from enrich_scripts import  post_toGraphDB
+from refresh_stats import refresh
+
+def upload_one_ttl_to_graphdb(file_path):
+    endpoint = "http://localhost:7200/repositories/UnitedApp/statements"
+    headers = {
+        "Content-Type": "text/turtle"
+    }
+    with open(file_path, "rb") as f:
+        response = requests.post(endpoint, headers=headers, data=f)
+
+        if response.status_code in (200, 204):
+            print(f"File Uploaded!")
+        else:
+            print(f" Failed to upload: {response.status_code}")
+            print(response.text)
 
 def upload_ttl_folder_to_graphdb(folder_path):
     """
@@ -31,31 +30,16 @@ def upload_ttl_folder_to_graphdb(folder_path):
         folder_path (str): Path to the folder containing TTL files.
        
     """
-    endpoint = "http://localhost:7200/repositories/UnitedApp/statements"
-    headers = {
-        "Content-Type": "text/turtle"
-    }
-
     for filename in os.listdir(folder_path):
         if filename.endswith(".ttl"):
+            print(f"Uploading {filename} ...")
             file_path = os.path.join(folder_path, filename)
-            print(f"📤 Uploading {filename} ...")
-
-            with open(file_path, "rb") as f:
-                response = requests.post(endpoint, headers=headers, data=f)
-
-            if response.status_code in (200, 204):
-                print(f"✅ Uploaded {filename}")
-            else:
-                print(f"❌ Failed to upload {filename}: {response.status_code}")
-                print(response.text)
-
-    print("🎯 All TTL files processed.")
+            upload_one_ttl_to_graphdb(file_path)
 
 
 def add_players(team_name):
     """
-    Function that reads from a csv data about players and creates a graph
+    Function that reads from a csv file about players and creates a graph
     """
     g = Graph()
     #g.parse("unitedOntology.owl", format="xml")
@@ -130,7 +114,7 @@ def find_player(player_name, team_name=None):
             #print(f"Player found: {player_uri}")
             return player_uri
         else:
-            #print("Player not found.")
+            print("Player not found. Query:", query)
             return None
     else:
         print(f"Error querying GraphDB: {response.status_code}")
@@ -285,12 +269,13 @@ def add_match_data(match_file):
     fouls_won_away = stats["Fouls Won"]["away"]
     yellow_cards_home = stats["Yellow Cards"]["home"]
     yellow_cards_away = stats["Yellow Cards"]["away"]
-
+    red_cards_home = stats["Red Cards"]["home"]
+    red_cards_away = stats["Red Cards"]["away"]
 
     g = Graph()
     #g.parse("unitedOntology.owl", format="xml")
     UO = Namespace("http://semanticweb.org/unitedOntology#")
-    g.bind("uo", UO)
+    g.bind("", UO)
 
     # create match, home, away team URI
     matchURI = URIRef(UO+f"{match_name}")
@@ -317,6 +302,9 @@ def add_match_data(match_file):
     # goals scored
     g.add((home_team_statsURI, UO.teamGoalsScored, Literal(home_goals, datatype=XSD.integer)))
     g.add((away_team_statsURI, UO.teamGoalsScored, Literal(away_goals, datatype=XSD.integer)))
+    # goals conceded
+    g.add((home_team_statsURI, UO.goalsConceded, Literal(away_goals, datatype=XSD.integer)))
+    g.add((away_team_statsURI, UO.goalsConceded, Literal(home_goals, datatype=XSD.integer)))
     # ball possession
     g.add((home_team_statsURI, UO.ballPossession, Literal(possesion_home, datatype=XSD.float)))
     g.add((away_team_statsURI, UO.ballPossession, Literal(possesion_away, datatype=XSD.float)))
@@ -347,7 +335,10 @@ def add_match_data(match_file):
     # yellow cards
     g.add((home_team_statsURI, UO.teamYellowCards, Literal(yellow_cards_home, datatype=XSD.integer)))
     g.add((away_team_statsURI, UO.teamYellowCards, Literal(yellow_cards_away, datatype=XSD.integer)))
-
+    # red cards
+    g.add((home_team_statsURI, UO.teamRedCards, Literal(red_cards_away, datatype=XSD.integer)))
+    g.add((away_team_statsURI, UO.teamRedCards, Literal(red_cards_away, datatype=XSD.integer)))
+    
 
     # Player data
     home_players = match_data["home_team_players"]
@@ -391,7 +382,6 @@ def add_match_data(match_file):
         playerURI = find_player(player_name, away_team)
         if playerURI is None:
             unfound_players.append(player_name)
-
             continue
         all_players[playerURI] = pdata
         player_goals = pdata["goals"]
@@ -406,7 +396,7 @@ def add_match_data(match_file):
         # create playerMatchStats instance
         # add player stats
         player_name = playerURI.split('#')[-1]
-        playerStatsURI = URIRef(UO + f"{player_name}Stats_{match_name}")
+        playerStatsURI = URIRef(UO + f"{player_name}_Stats_{match_name}")
         g.add((playerStatsURI, RDF.type, UO.PlayerMatchStats))
         g.add((playerStatsURI, UO.matchStatsOfPlayer, URIRef(playerURI)))
         g.add((playerStatsURI, UO.playerStatsOfMatch, matchURI))
@@ -439,13 +429,15 @@ def add_match_data(match_file):
             g.add((playerStatsURI, UO.playerScored, goal_URI))
             # find assist for this goal and create Assist instance
             assistPlayerURI = find_assist(goal_time, all_players)
-            print(f"Goal at {goal_time} by {player_name} assisted by {assistPlayerURI}")
+            #print(f"Goal at {goal_time} by {player_name} assisted by {assistPlayerURI}")
             if assistPlayerURI:
                 # create Assist instance and append properties
                 assistURI = URIRef(UO + f"Assist_{match_name}_{assistPlayerURI.split('#')[-1]}_{goal_time}")
+                assistPlayerURI = URIRef(assistPlayerURI)
                 g.add((assistURI, RDF.type, UO.Assist))
                 g.add((assistURI, UO.assistTime, Literal(goal_time, datatype=XSD.string)))
                 g.add((assistURI, UO.assistForGoal, goal_URI))
+                g.add((goal_URI, UO.assistedBy, assistPlayerURI))
         
         # assists        
         assists = pdata["assists"]
@@ -472,19 +464,38 @@ def add_match_data(match_file):
             g.add((playerStatsURI, UO.playerReceivedRedCard, red_card_URI))
   
     print("Unfound players:", unfound_players)
-    with open("Data/hidden/unfound_players2.txt", "a") as fp:
+    with open("Data/hidden/unfound_players3.txt", "a") as fp:
         for p in unfound_players:
             fp.write(p + "\n")
         fp.close()
-    g.serialize(destination=f"Data/Matches/1st/{match_name}.ttl", format='turtle')
     
+    destination_file = f"Data/Matches/{gameweek}/ttls/{match_name}.ttl"
+    g.serialize(destination=destination_file, format='turtle')
+    
+    # validate with SHACL
+    g_shacl = Graph()
+    #latest_export = export_repo()
+    latest_export = "Data/ExportedRepos/repo_2025_10_22_17_20_35.ttl"
+    g_shacl.parse(latest_export, format="turtle")
+    g_shacl.parse(destination_file, format="turtle")
+    ont_graph = "ontology_export.ttl"
+    shapes = "shacl/shapes.ttl"
+    data_graph = g_shacl
+    ans, text = shacl_validate(ont_graph, shapes, data_graph)
+    if ans == False:
+        print(f"SHACL validation failed for match {match_name}, here is the answers text:", text)
+        os.remove(destination_file)
+    else:
+        print("SHACL validation passed! Uploading to GraphDB...")
+        upload_one_ttl_to_graphdb(destination_file)
+        refresh()
+        
     return
 
 if __name__ == "__main__":
     #add_team_data()
     #add_players("Wolverhampton_Wanderers")\
-    #add_match_data("Data/Matches/MCI_vs_BUR_PL25.json")
-    #add_match_data("Data/Matches/BHA_vs_FUL_PL25.json")
-    
-    upload_ttl_folder_to_graphdb("Data/Matches/1st/ttls")
+
+    #add_match_data("Data/Matches/9/Jsons/MUN_vs_BHA_PL25.json")
+    upload_ttl_folder_to_graphdb("Data/Matches/9/ttls")
     pass

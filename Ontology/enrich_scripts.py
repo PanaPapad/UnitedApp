@@ -1,13 +1,29 @@
 from rdflib import *
-from SPARQLWrapper import SPARQLWrapper, JSON
+from SPARQLWrapper import SPARQLWrapper, JSON, POST
+from unidecode import unidecode
 import requests
 import datetime
 import time
 import os
-from populate import post_toGraphDB
+import pandas as pd
+from io import StringIO
 
 GRAPHDB_ENDPOINT = "http://localhost:7200/repositories/UnitedApp"
 
+def post_toGraphDB(data):
+    """
+    Function that posts a ttl file to GraphDB
+    """
+    url = f"{GRAPHDB_ENDPOINT}/statements"
+
+    headers = {'Content-Type': 'text/turtle',}
+
+    response = requests.post(url, data=data.encode('utf=8'), headers=headers)
+    if response.status_code == 204:
+        print('Data successfully added to GraphDB.')
+    else:
+        print(f'Error adding data to GraphDB: {response.status_code}')
+        print(response.text)
 
 def export_repo(format: str = "ttl"):
     """
@@ -40,7 +56,7 @@ def export_repo(format: str = "ttl"):
 
     current_time = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
     os.makedirs("ExportedRepos", exist_ok=True)
-    file_path = f"ExportedRepos/repo_{current_time}.{format}"
+    file_path = f"Data/ExportedRepos/repo_{current_time}.{format}"
 
     if response.status_code == 200:
         with open(file_path, "wb") as f:
@@ -50,6 +66,48 @@ def export_repo(format: str = "ttl"):
         print(f"Failed to export: {response.status_code} - {response.text}")
 
     return file_path
+
+def add_altLabels():
+    """
+    Script to add clean skos:altLabels to Player entities e.g. for Martin Ødegaard add skos:altLabel Martin Odegaard
+    """
+    repo_url = "http://localhost:7200/repositories/UnitedApp"
+    update_url = f"{repo_url}/statements"
+
+    # Step 1: Fetch players with non-ASCII labels
+    sparql = SPARQLWrapper(repo_url)
+    sparql.setReturnFormat(JSON)
+    sparql.setQuery("""
+    PREFIX : <http://semanticweb.org/unitedOntology#>
+    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+    SELECT ?player ?label
+    WHERE {
+    ?player a :Player ;
+            rdfs:label ?label .
+    FILTER(REGEX(STR(?label), "[^\\\\x00-\\\\x7F]"))
+    }
+    """)
+    results = sparql.query().convert()
+
+    # Step 2: Generate and insert altLabels
+    update = SPARQLWrapper(update_url)
+    update.setMethod(POST)
+
+    for r in results["results"]["bindings"]:
+        uri = r["player"]["value"]
+        label = r["label"]["value"]
+        print(uri, label)
+        alt_label = unidecode(label)
+        print(alt_label)
+        q = f"""
+        PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+        INSERT DATA {{
+        <{uri}> skos:altLabel "{alt_label}"@en .
+        }}
+        """
+        update.setQuery(q)
+        update.query()
 
 def enrichStadiums():
     """
@@ -175,6 +233,9 @@ def batch(iterable, size=10):
         yield iterable[i:i + size]
 
 def find_wikidata_team(team_name):
+    """
+    Function that given a team name returns the wikidata QID of the team
+    """
     endpoint =SPARQLWrapper("https://query.wikidata.org/sparql")
     team_name+= " F.C."
     query= """
@@ -198,9 +259,14 @@ def find_wikidata_team(team_name):
     return qid
 
 def enrichPlayers():
-    
+    """
+    Function that enriches players with data from wikidata
+    Adds (if found) properties: birthDate, height, weight and pictureURL
+    """
+    # load repo (or used from ExportedRepos)
     #repo = export_repo()
     repo = "ExportedRepos/repo2025-10-08_15_03_00_170599.ttl"
+    # create a graph and load ontology and repo
     g = Graph()
     g.parse("unitedOntology.owl",format="xml")
     g.parse(repo, format="turtle")
@@ -211,17 +277,18 @@ def enrichPlayers():
     endpoint =SPARQLWrapper("https://query.wikidata.org/sparql")
     # find all teams and the players of each team
     team_labels = get_team_labels()
-    #team_labels = ["Manchester United"]
+    # list to store players that couldnt be found
     unwanted_players = []
     for team in team_labels:
+        # find players of team in our graph
         players = get_players_of_team(team)
-        
+        # find wikidata QID of team
         wikidata_team = find_wikidata_team(team)
+        # batch players to avoid too long queries
         for batch_players in batch(players, size=10):
-
             if not batch_players:
                 continue
-
+            # construct VALUES clause safely
             safe_labels = []
             for label, _ in batch_players:
                 escaped = label.replace('"', '\\"')
@@ -279,16 +346,53 @@ def enrichPlayers():
             print("Batch players left: ", batch_players)
             for l,_ in batch_players:
                 unwanted_players.append(l)
-            print(unwanted_players)
-
         print("Unwanted Players", unwanted_players)
-            
+    
+    # serialize and post to graphDB
     rdf_data = g.serialize(format='turtle')
     post_toGraphDB(rdf_data)
+    # save unwanted players to a file
     file = open('unwanted_players.txt','a')
-    print("Length of ynwanted players:", len(unwanted_players))
+    print("Length of unwanted players:", len(unwanted_players))
     for p in unwanted_players:
 	    file.write(p+"\n")     
+
+def get_team_data():
+    """
+    Function to get a table with team information from wikipedia
+    """
+    url = "https://en.wikipedia.org/wiki/2025%E2%80%9326_Premier_League"
+
+    # Add browser-like headers
+    headers = {
+        "User-Agent": (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/123.0.0.0 Safari/537.36"
+        )
+    }
+
+    # Get HTML content with requests
+    response = requests.get(url, headers=headers)
+    response.raise_for_status()
+
+
+    # Now parse HTML with pandas
+    tables = pd.read_html(StringIO(response.text))
+
+    # Print all tables and their columns
+    for i, table in enumerate(tables):
+        print(f"Table {i}: {table.columns.tolist()}")
+
+    # The stadiums/teams table is usually in index 1, but check the printout
+    stadiums_table = tables[1]
+
+    # Save to CSV
+    stadiums_table.to_csv("data/premier_league_teams.csv", index=False, encoding="utf-8")
+
+    print(stadiums_table)
+    # manually added the code column
+
 
 if __name__ == "__main__":
     #enrichPlayers()

@@ -1,72 +1,276 @@
-@prefix uo: <http://semanticweb.org/unitedOntology#> .
+@prefix : <http://semanticweb.org/unitedOntology#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix sh: <http://www.w3.org/ns/shacl#> .
 
-uo:MatchShape
+:MatchShape
     a sh:NodeShape ;
-    sh:targetClass uo:Match ;
+    sh:targetClass :Match ;
     sh:sparql [
         a sh:SPARQLConstraint ;
         sh:message "homeTeam and awayTeam must be different." ;
         sh:select """
             SELECT $this ?team
             WHERE {
-                $this uo:hasHomeTeam ?team ;
-                      uo:hasAwayTeam ?team .
+                $this :hasHomeTeam ?team ;
+                      :hasAwayTeam ?team .
             }
         """ ;
     ] ;
     
     sh:property [
-        sh:path uo:hasHomeTeam ;
+        sh:path :hasHomeTeam ;
         sh:minCount 1 ;
         sh:maxCount 1 ;
         sh:message "Each match can have only one home team" ;
     ] ;
     sh:property [
-        sh:path uo:hasAwayTeam ;
+        sh:path :hasAwayTeam ;
         sh:minCount 1 ;
         sh:maxCount 1 ;
         sh:message "Each match can have only one away team" ;
     ] ;
     sh:property [
-        sh:path uo:matchPartOfTournament ;
+        sh:path :matchPartOfTournament ;
         sh:maxCount 1 ;
         sh:message "Each match can only be part of one tournament" ;
     ] ;
     sh:property [
-        sh:path uo:matchGameweek ;
+        sh:path :matchGameweek ;
         sh:maxCount 1 ;
+        sh:datatype xsd:integer ;
         sh:minInclusive 1 ;
         sh:message "Each match can have only one gameweek, which needs to be an integer larger or equal to 1" ;
     ] .
 
-uo:PlayerShape
+:PlayerShape
     a sh:NodeShape ;
-    sh:targetClass uo:Player ;
+    sh:targetClass :Player ;
 
     sh:property [
-        sh:path uo:playsFor ;
+        sh:path :playsFor ;
         sh:maxCount 1 ;
         sh:message "Each player can only play for one team" ;
     ] .
 
-uo:TeamShape
+:TeamShape
     a sh:NodeShape ;
-    sh:targetClass uo:Team ;
+    sh:targetClass :Team ;
 
     sh:property [
-        sh:path uo:hasCoach ;
+        sh:path :hasCoach ;
         sh:maxCount 1;
         sh:message "Each team can only have one coach" ;
     ] ;
     sh:property [
-        sh:path uo:hasTeamCode ;
+        sh:path :hasTeamCode ;
+        sh:datatype xsd:string ;
         sh:maxCount 1;
         sh:message "Each team can only have only one team code" ;
     ] ;
     sh:property [
-        sh:path uo:homeStadium ;
+        sh:path :homeStadium ;
         sh:maxCount 1;
         sh:message "Each team can only have only one home stadium" ;
+    ] .
+
+:TeamMatchStatsShape
+    a sh:NodeShape ;
+    sh:targetClass :TeamMatchStats ;
+
+    sh:property [
+        sh:path :statsOfTeam ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:message "a TeamMatchStats instance needs to have one and only one statsOfTeam property" ;
+    ] ;
+    sh:property [
+        sh:path :ballPossession ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:float ;
+        sh:minInclusive 0 ;
+        sh:maxInclusive 100 ;
+        sh:message "Ball Possesion can be from 0 to 100" ;
+    ] ;
+    sh:property [
+        sh:path :aerialDuelsWon ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:float ;
+        sh:minInclusive 0 ;
+        sh:maxInclusive 100 ;
+        sh:message "Aerial Dules won can be from 0 to 100" ;
+    ] ;
+    sh:property [
+        sh:path :corners ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:integer ;
+        sh:minInclusive 0 ;
+        sh:message "Corners need to be minimum 0" ;
+    ] ;
+    sh:property [
+        sh:path :teamFoulsCommitted ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:integer ;
+        sh:minInclusive 0 ;
+        sh:message "Fouls Committed need to be minimum 0" ;
+    ] ;
+    sh:property [
+        sh:path :teamFoulsWon ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:integer ;
+        sh:minInclusive 0 ;
+        sh:message "Fouls won need to be minimum 0" ;
+    ] ;
+    sh:property [
+        sh:path :teamGoalsScored ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:integer ;
+        sh:minInclusive 0 ;
+        sh:message "Team goals scored need to be minimum 0" ;
+    ] ;
+    sh:property [
+        sh:path :teamOffsides ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:integer ;
+        sh:minInclusive 0 ;
+        sh:message "Team offsides need to be minimum 0" ;
+    ] ;
+    sh:property [
+        sh:path :teamTotalShots ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:integer ;
+        sh:minInclusive 0 ;
+        sh:message "Total shoots need to be minimum 0" ;
+    ] ;
+    sh:property [
+        sh:path :teamShotsOnTarget ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:integer ;
+        sh:minInclusive 0 ;
+        sh:message "Corners need to be minimum 0" ;
+    ] ;
+    sh:property [
+        sh:path :teamYellowCards ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:integer ;
+        sh:minInclusive 0 ;
+        sh:message "Team YellowCards need to be minimum 0" ;
+    ] ;
+    sh:property [
+        sh:path :totalSaves ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:integer ;
+        sh:minInclusive 0 ;
+        sh:message "Total Saves need to be minimum 0" ;
+    ] ;
+
+
+
+    # SPARQLConstraint: teamShotsOnTarget <= teamTotalShots
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Shots on target need to be less or equal than total shots." ;
+        sh:select """
+            SELECT $this 
+            WHERE {
+                $this a :TeamMatchStats ;
+                    :teamTotalShots ?total ;
+                    :teamShotsOnTarget ?onTarget .
+                FILTER (?onTarget > ?total)                    
+            }
+        """ ;
+    ] .
+
+:PlayerMatchStatsShape
+    a sh:NodeShape ;
+    sh:targetClass :PlayerMatchStats ;
+    
+    sh:property [
+        sh:path :matchStatsOfPlayer ;
+        sh:minCount 1;
+        sh:maxCount 1 ;
+        sh:message "matchStatsOfPlayer need to be for one and only one player" ;
+    ] ;
+    sh:property [
+        sh:path :minutesPlayed ;
+        sh:maxCount 1 ;
+        sh:minInclusive 0;
+        sh:message "minutesPlayed need to be minimum 0" ;
+    ] ;
+    sh:property [
+        sh:path :playerStatsOfMatch ;
+        sh:maxCount 1 ;
+        sh:message "player match stats can be for only one match" ;
+    ] .
+
+:GoalShape
+    a sh:NodeShape ;
+    sh:targetClass :Goal ;
+
+    sh:property [
+        sh:path :goalTime;
+        sh:maxCount 1 ; 
+        sh:message "There can only be one time of a goal" ;
+    ] ;
+    sh:property [
+        sh:path :goalOrderInMatch ;
+        sh:datatype xsd:integer ;
+        sh:maxCount 1 ;
+        sh:minInclusive 1;
+        sh:message "There can only be one goal order of the match and it needs to minumum 1" ;
+    ] ;
+    sh:property [
+        sh:path :isOwnGoal ;
+        sh:datatype xsd:boolean ;
+        sh:maxCount 1 ;
+        sh:message "There can only be one is own goal" ;
+    ] ;
+    sh:property [
+        sh:path :isPenaltyGoal ;
+        sh:datatype xsd:boolean ;
+        sh:maxCount 1 ;
+        sh:message "There can only be one is penalty goal" ;
+    ] ;
+    sh:property [
+        sh:path :isFreeKickGoal ;
+        sh:datatype xsd:boolean ;
+        sh:maxCount 1 ;
+        sh:message "There can only be one is Free Kick goal" ;
+    ] ;
+
+    # SPARQLConstraint: a goal cannot be at the same time an own goal, a penalty goal or a isFreeKickGoal 
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "A goal cannot be at the same time an own goal a penalty goal or a free kick goal" ;
+        sh:select """
+            SELECT $this 
+            WHERE {
+                $this a :Goal .
+                OPTIONAL { $this :isOwnGoal ?own . }
+                OPTIONAL { $this :isPenaltyGoal ?pen . }
+                OPTIONAL { $this :isFreeKickGoal ?free . }
+                
+                BIND(
+                    (IF(bound(?own) && ?own = true, 1, 0) +
+                     IF(bound(?pen) && ?pen = true, 1, 0) +
+                     IF(bound(?free) && ?free = true, 1, 0))
+                    AS ?count
+                )
+
+                FILTER(?count > 1)                  
+            }
+        """ ;
+    ] .
+
+:AssistShape
+    a sh:NodeShape ;
+    sh:targetClass :Assist ;
+    sh:property [
+        sh:path :assistTime;
+        sh:maxCount 1 ; 
+        sh:message "There can only be one time of the assist" ;
+    ] ;
+    sh:property [
+        sh:path :assistForGoal;
+        sh:maxCount 1 ; 
+        sh:message "There can only be one goal for this assist" ;
     ] .

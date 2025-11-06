@@ -164,6 +164,12 @@ with onto:
         comment = "A goal scored in a match"
         pass
 
+    # Assist
+    class Assist(Thing):
+        label = "Assist"
+        comment = "An assist in a match"
+        pass
+
     class goalScoredBy(Goal >> Player, FunctionalProperty):
         label = "goalScoredBy"
         comment = "The player who scored the goal"
@@ -215,13 +221,19 @@ with onto:
         comment = "The player who assisted the goal"
         pass
 
-    
-    # Assist
-    class Assist(Thing):
-        label = "Assist"
-        comment = "An assist in a match"
+    class assistForGoal(Assist >> Goal, FunctionalProperty):
+        label = "assistForGoal"
+        comment = "The goal the assist was made for"
         pass
 
+    class goalHasAssist(Goal >> Assist):
+        label = "goalHasAssist"
+        comment = "The assist for the goal"
+        inverse_property = assistForGoal
+        pass
+
+        
+    # assist properties
     class assistTime(Assist >> str, FunctionalProperty):
         label = "assistTime"
         comment = "The time the assist was made in the match, e.g., 45+2'"
@@ -230,11 +242,6 @@ with onto:
     class assistInMatch(Assist >> Match, FunctionalProperty):
         label = "assistInMatch"
         comment = "The match the assist was made in"
-        pass
-
-    class assistForGoal(Assist >> Goal, FunctionalProperty):
-        label = "assistForGoal"
-        comment = "The goal the assist was made for"
         pass
     
     class YellowCard(Thing):
