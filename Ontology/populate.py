@@ -36,7 +36,6 @@ def upload_ttl_folder_to_graphdb(folder_path):
             file_path = os.path.join(folder_path, filename)
             upload_one_ttl_to_graphdb(file_path)
 
-
 def add_players(team_name):
     """
     Function that reads from a csv file about players and creates a graph

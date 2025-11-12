@@ -436,12 +436,24 @@ if __name__ == "__main__":
             "https://www.skysports.com/football/manchester-city-vs-bournemouth/stats/531224",
             "https://www.skysports.com/football/sunderland-vs-everton/stats/531226"
         ],
+        11:[
+            "https://www.skysports.com/football/tottenham-hotspur-vs-manchester-united/stats/531237",
+            "https://www.skysports.com/football/everton-vs-fulham/stats/531233",
+            "https://www.skysports.com/football/west-ham-united-vs-burnley/stats/531238",
+            "https://www.skysports.com/football/sunderland-vs-arsenal/stats/531236",
+            "https://www.skysports.com/football/chelsea-vs-wolverhampton-wanderers/stats/531231",
+            "https://www.skysports.com/football/aston-villa-vs-bournemouth/stats/531229",
+            "https://www.skysports.com/football/brentford-vs-newcastle-united/stats/531230",
+            "https://www.skysports.com/football/crystal-palace-vs-brighton-and-hove-albion/stats/531232",
+            "https://www.skysports.com/football/nottingham-forest-vs-leeds-united/stats/531235",
+            "https://www.skysports.com/football/manchester-city-vs-liverpool/stats/531234"
+        ]
     }
 
     # for every gameweek and every match in that gameweek parse match stats and player stats and combine them
     # then save them to a json file
     for gameweek, urls in PL_URLS.items():
-        if gameweek !=10:
+        if gameweek !=11:
             continue
 
         for match_stats_url in urls:

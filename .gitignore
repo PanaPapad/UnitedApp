@@ -1,5 +1,9 @@
 bin/*
 .vscode/*
+Ontology/__pycache__/*
 Ontology/venv.*
-
+Ontology/Data/Matches/*
+Ontology/Data/hidden/*
+Ontology/Data/ExportedRepos/*
 node_modules
+Ontology/shacl/__pycache__
